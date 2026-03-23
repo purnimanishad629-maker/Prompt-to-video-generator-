@@ -1,0 +1,8 @@
+flask==2.3.3
+elevenlabs==0.2.5
+opencv-python==4.8.1.78
+pillow==10.0.1
+python-dotenv==1.0.0
+gtts==2.4.0
+moviepy==1.0.3
+
