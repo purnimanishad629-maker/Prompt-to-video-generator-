@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Video Generator - Poetry Videos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .avatar-option {
+            text-align: center;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 10px;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .avatar-option.selected {
+            border-color: #667eea;
+            background: #f0f0ff;
+        }
+        
+        .avatar-option img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 5px;
+        }
+        
+        .avatar-option span {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .voice-options {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        
+        .voice-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status-card {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .status-card.show {
+            display: block;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.5s;
+            border-radius: 10px;
+        }
+        
+        .status-text {
+            text-align: center;
+            color: #666;
+            margin: 10px 0;
+        }
+        
+        .download-btn {
+            background: #28a745;
+            margin-top: 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .error-text {
+            color: #dc3545;
+            text-align: center;
+        }
+        
+        .success-text {
+            color: #28a745;
+            text-align: center;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .poetry-examples {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff3cd;
+            border-radius: 10px;
+        }
+        
+        .poetry-examples h4 {
+            margin-bottom: 10px;
+            color: #856404;
+        }
+        
+        .example-item {
+            padding: 8px;
+            cursor: pointer;
+            color: #856404;
+            border-left: 3px solid #ffc107;
+            margin: 5px 0;
+            transition: all 0.2s;
+        }
+        
+        .example-item:hover {
+            background: #ffeeba;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            .avatar-grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+            .avatar-option img {
+                width: 60px;
+                height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 AI Poetry Video Generator</h1>
+        <div class="subtitle">अपनी कविता को बनाएं वीडियो • हिंदी में</div>
+        
+        <div class="form-group">
+            <label>📝 अपनी कविता / पोएट्री लिखें:</label>
+            <textarea id="prompt" placeholder="उदाहरण:
+aaj ke log phone chalane mein vyast hai
+koi kisi ko nahi poochta
+rishte dhundhle ho gaye
+dil se dil ka milna mushkil ho gaya..."></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label>🖼️ अवतार चुनें (अपनी फोटो भी डाल सकती हैं):</label>
+            <div class="avatar-grid" id="avatarGrid">
+                <!-- Avatars will be loaded here -->
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>🎤 आवाज़ चुनें:</label>
+            <div class="voice-options">
+                <label class="voice-option">
+                    <input type="radio" name="voice" value="gtts" checked> 
+                    🆓 मुफ्त आवाज़ (Google TTS)
+                </label>
+                <label class="voice-option">
+                    <input type="radio" name="voice" value="elevenlabs"> 
+                    ⭐ प्रीमियम आवाज़ (ElevenLabs - बेहतर क्वालिटी)
+                </label>
+            </div>
+        </div>
+        
+        <button id="generateBtn" onclick="generateVideo()">
+            🚀 वीडियो बनाएं
+        </button>
+        
+        <div class="poetry-examples">
+            <h4>✨ पोएट्री के सैंपल (Click करके use करें):</h4>
+            <div class="example-item" onclick="useExample(1)">
+                💔 "aaj ke log phone chalane mein vyast hai, koi kisi ko nahi poochta..."
+            </div>
+            <div class="example-item" onclick="useExample(2)">
+                📱 "phone ki duniya mein kho gaye hum, apno se bhi anjaan ho gaye..."
+            </div>
+            <div class="example-item" onclick="useExample(3)">
+                💕 "rishte dhundhle ho gaye, dil se dil ka milna mushkil ho gaya..."
+            </div>
+        </div>
+        
+        <div id="statusCard" class="status-card">
+            <div class="progress-bar">
+                <div id="progressFill" class="progress-fill"></div>
+            </div>
+            <div id="statusText" class="status-text">
+                <span class="loading-spinner"></span>
+                वीडियो बन रहा है...
+            </div>
+            <div id="downloadSection" style="text-align: center;"></div>
+        </div>
+    </div>
+    
+    <script>
+        let selectedAvatar = null;
+        let videoId = null;
+        let checkInterval = null;
+        
+        // Load avatars on page load
+        window.onload = function() {
+            loadAvatars();
+        };
+        
+        function loadAvatars() {
+            // Default avatars (you can add more in the avatars folder)
+            const defaultAvatars = [
+                { name: 'girl1.png', label: '👧 गर्ल' },
+                { name: 'boy1.png', label: '👦 बॉय' },
+                { name: 'default.png', label: '✨ डिफॉल्ट' }
+            ];
+            
+            const avatarGrid = document.getElementById('avatarGrid');
+            avatarGrid.innerHTML = '';
+            
+            defaultAvatars.forEach(avatar => {
+                const div = document.createElement('div');
+                div.className = 'avatar-option';
+                div.onclick = () => selectAvatar(avatar.name, div);
+                
+                div.innerHTML = `
+                    <img src="/static/avatars/${avatar.name}" 
+                         onerror="this.src='https://via.placeholder.com/80?text=Avatar'">
+                    <span>${avatar.label}</span>
+                `;
+                
+                avatarGrid.appendChild(div);
+            });
+            
+            // Auto-select first avatar
+            if (avatarGrid.children[0]) {
+                selectAvatar(defaultAvatars[0].name, avatarGrid.children[0]);
+            }
+        }
+        
+        function selectAvatar(name, element) {
+            // Remove selected class from all
+            document.querySelectorAll('.avatar-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            // Add selected class to clicked
+            element.classList.add('selected');
+            selectedAvatar = name;
+        }
+        
+        function useExample(num) {
+            const examples = {
+                1: "aaj ke log phone chalane mein vyast hai\nkoi kisi ko nahi poochta\nrishte dhundhle ho gaye\napno se bhi anjaan ho gaye",
+                2: "phone ki duniya mein kho gaye hum\napno se bhi anjaan ho gaye\nlike comment mein lage hai sab\ndil ki baat karein kahan ho gaye",
+                3: "rishte dhundhle ho gaye\nchehre bhool se gaye\ndil se dil ka milna mushkil\nphone mein hi sab khilkhilaye"
+            };
+            document.getElementById('prompt').value = examples[num];
+        }
+        
+        async function generateVideo() {
+            const prompt = document.getElementById('prompt').value.trim();
+            
+            if (!prompt) {
+                alert('कृपया कविता लिखें!');
+                return;
+            }
+            
+            if (!selectedAvatar) {
+                alert('कृपया अवतार चुनें!');
+                return;
+            }
+            
+            const voiceType = document.querySelector('input[name="voice"]:checked').value;
+            
+            // Disable button and show status
+            const btn = document.getElementById('generateBtn');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ वीडियो बन रहा है...';
+            
+            const statusCard = document.getElementById('statusCard');
+            statusCard.classList.add('show');
+            document.getElementById('downloadSection').innerHTML = '';
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('statusText').innerHTML = '<span class="loading-spinner"></span> शुरू हो रहा है...';
+            
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prompt: prompt,
+                        avatar: selectedAvatar,
+                        voice_type: voiceType
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'processing') {
+                    videoId = data.video_id;
+                    startCheckingStatus();
+                } else {
+                    throw new Error(data.message);
+                }
+                
+            } catch (error) {
+                document.getElementById('statusText').innerHTML = 
+                    `<span class="error-text">❌ Error: ${error.message}</span>`;
+                btn.disabled = false;
+                btn.innerHTML = '🚀 वीडियो बनाएं';
+            }
+        }
+        
+        function startCheckingStatus() {
+            if (checkInterval) clearInterval(checkInterval);
+            
+            checkInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`/status/${videoId}`);
+                    const data = await response.json();
+                    
+                    // Update progress
+                    document.getElementById('progressFill').style.width = `${data.progress}%`;
+                    
+                    if (data.status === 'generating_audio') {
+                        document.getElementById('statusText').innerHTML = 
+                            '<span class="loading-spinner"></span> 🎤 आवाज़ बन रही है...';
+                    } else if (data.status === 'creating_video') {
+                        document.getElementById('statusText').innerHTML = 
+                            '<span class="loading-spinner"></span> 🎬 वीडियो बन रहा है...';
+                    } else if (data.status === 'completed') {
+                        clearInterval(checkInterval);
+                        document.getElementById('statusText').innerHTML = 
+                            '<span class="success-text">✅ वीडियो तैयार है!</span>';
+                        document.getElementById('downloadSection').innerHTML = `
+                            <a href="${data.video_url}" download class="download-btn" style="
+                                display: inline-block;
+                                background: #28a745;
+                                color: white;
+                                padding: 12px 24px;
+                                border-radius: 10px;
+                                text-decoration: none;
+                                font-weight: bold;
+                                margin-top: 15px;
+                            ">
+                                📥 वीडियो डाउनलोड करें
+                            </a>
+                            <br>
+                            <small style="color: #666;">वीडियो YouTube Shorts के लिए ऑप्टिमाइज़ है</small>
+                        `;
+                        
+                        // Re-enable button
+                        document.getElementById('generateBtn').disabled = false;
+                        document.getElementById('generateBtn').innerHTML = '🚀 वीडियो बनाएं';
+                        
+                    } else if (data.status === 'error') {
+                        clearInterval(checkInterval);
+                        document.getElementById('statusText').innerHTML = 
+                            `<span class="error-text">❌ Error: ${data.error}</span>`;
+                        document.getElementById('generateBtn').disabled = false;
+                        document.getElementById('generateBtn').innerHTML = '🚀 वीडियो बनाएं';
+                    }
+                    
+                } catch (error) {
+                    console.error('Status check error:', error);
+                }
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
